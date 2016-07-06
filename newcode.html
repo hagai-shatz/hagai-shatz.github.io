@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>NLP New Code</title>
+    <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        div {
+            width: 3em;
+            height: 1.5em;
+            text-align: center;
+            font-size: 3em;
+            font-weight: bold;
+            float: right;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            var b = $(document.body);
+            b.append($('<div></div>').text('כחול').css('color', 'blue'));
+            b.append($('<div></div>').text('ירוק').css('color', 'green'));
+            b.append($('<div></div>').text('אדום').css('color', 'red'));
+
+            var t, c = '';
+            for (var i = 0; i < 200; i++) {
+                c = clr(c);
+                t = txt(c);
+                b.append($('<div></div>').text(t).css('color', c));
+            }
+        });
+
+        function clr(color) {
+            var colors = ['red', 'green', 'blue'];
+            var c = colors[Math.floor(Math.random() * 3)];
+            if (c == color && Math.random() > 0.2) return clr(color);
+            return c;
+        }
+
+        function txt(color) {
+            var c = clr(color);
+            var name = {red: 'אדום', green: 'ירוק', blue: 'כחול'};
+            return name[c];
+        }
+    </script>
+</head>
+<body>
+
+</body>
+</html>

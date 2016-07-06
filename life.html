@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Life In Weeks</title>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="//www.geoplugin.net/javascript.gp"></script>
+    <style type="text/css">
+        .week {
+            width: 10px;
+            height: 10px;
+            margin: 1px;
+            border: solid 1px black;
+            float: left;
+            background-color: white;
+        }
+        .age {
+            font-size: xx-small;
+            margin-left: -13px;
+            position:relative;
+            z-index: -10;
+        }
+        #weeks {
+            margin-left: 20px;
+        }
+        .inline {
+            display: inline-block;
+        }
+        fieldset {
+            border: none;
+        }
+    </style>
+    <script type="application/javascript">
+        $(function(){
+            $.ajax('http://apps.who.int/gho/athena/data/COUNTRY.json', {dataType: 'jsonp'}).done(function(data) {
+                var map = {};
+                $.each(data.dimension[0].code, function(i,code){
+                    if (code.attr === undefined) return;
+                    var isoAttr = code.attr.find(function(item){ return item.category == 'ISO2'; });
+                    if (isoAttr) map[isoAttr.value] = code.label;
+                    isoAttr = code.attr.find(function(item){ return item.category == 'ISO'; });
+                    if (isoAttr) map[isoAttr.value] = code.label;
+                });
+
+                var country = map[geoplugin_countryCode()];
+                console.log(country);
+
+                var url = 'http://apps.who.int/gho/athena/data/GHO/WHOSIS_000001.json?profile=simple&filter=SEX:MLE;COUNTRY:'+country;
+                $.ajax(url, {dataType: 'jsonp'}).done(function(life){
+                    console.log(life);
+                });
+            });
+
+            var dob = new Date(localStorage['weeks-dob'] || '1970-01-01');
+            $('input[name=dob]')
+                    .val(dob.toISOString().substr(0,10))
+                    .change(function(){
+                        localStorage['weeks-dob'] = $(this).val();
+                    });
+
+            var sex = localStorage['weeks-sex'] || 'FMLE';
+            $('input[value='+sex+']').prop('checked',true);
+            $('input[name=sex]').change(function(){
+                localStorage['weeks-sex'] = $(this).val();
+            });
+
+            $('select[name=country]').append($('<option/>').text(geoplugin_countryName()).val(geoplugin_countryCode()).attr('selected','true'));
+
+            for (var i = 0; i < 52*90; i++) {
+                var age = Math.floor(i / 52);
+                var month = Math.floor((i - age*52) * 7 * 12 / 365);
+                var color = '#DDFF9D';
+                if (age > 4) color = '#FFE47A';
+                if (age > 19) color = '#97DFFF';
+                if (age > 23) color = '#FFB8BF';
+                if (age > 63) color = '#D9C7FF';
+                if (age > 76) color = '';
+                $('<div class="week"/>')
+                        .attr('title', 'Age ' + age + ' years and ' + month + ' months')
+                        .css('background-color', color)
+                        .append($('<div class="age"/>').text(age.toFixed(0)))
+                        .appendTo('#weeks');
+            }
+        });
+    </script>
+</head>
+<body>
+<div>
+    <h3 class="inline">My life in weeks</h3>
+    <fieldset class="inline">
+        Gender:
+        <input type="radio" name="sex" id="sex-female" value="FMLE"/><label for="sex-female">Female</label>
+        <input type="radio" name="sex" id="sex-male" value="MLE"/><label for="sex-male">Male</label>
+    </fieldset>
+    <fieldset class="inline">
+        Date of birth:
+        <input type="date" name="dob"/>
+    </fieldset>
+    <fieldset class="inline">
+        Country:
+        <select name="country"></select>
+    </fieldset>
+</div>
+<div id="weeks"></div>
+</body>
+</html>
